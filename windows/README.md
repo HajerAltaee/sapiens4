@@ -8,7 +8,7 @@ Chat uses your authenticated Codex CLI 0.156.1 or newer. The desktop app's insta
 
 User data is stored at `%LOCALAPPDATA%\Sapiens4`, separately from the application files. The native window supports Chat, Notes, attachments, tasks and per-Sapi browser tabs, bookmarks and zoom. Browser websites have separate profiles and no access to the desktop app bridge. Closing the app stops its local server and cancels active model processes; saved conversations remain recoverable.
 
-The Windows executable, taskbar and window use the workspace logo. The native title bar shows only the icon; the Sapiens4 name appears once in the app header. The browser favicon and running window icon use a dark background in dark mode and a light background in light mode. The native title bar follows the same theme, including when the workspace is hidden. Windows 11 also matches the header's background and text colors. Browser blank pages and plain-text documents follow the app theme; websites receive the same light/dark preference and retain their own styles.
+The Windows executable, taskbar and window use the workspace logo. The native title bar displays `Sapiens4` so Win32 tools, including Blindly, can discover the window and request a normal foreground return. A blank native caption is excluded by Blindly's current window discovery even when the accessibility name is present. This title does not bypass Windows foreground restrictions or any input guard. The browser favicon and running window icon use a dark background in dark mode and a light background in light mode. The native title bar follows the same theme, including when the workspace is hidden. Windows 11 also matches the header's background and text colors. Browser blank pages and plain-text documents follow the app theme; websites receive the same light/dark preference and retain their own styles.
 
 The first build is unsigned. No automatic updater or installer is included: replace the extracted application directory to update it, keeping the data directory intact.
 
@@ -49,6 +49,21 @@ dotnet build windows/Sapiens4.csproj -c Release
 The executable also accepts `--smoke-report PATH --data-dir TEMP_DIRECTORY` to launch a real WebView2 window, verify the rendered app, save a JSON result and PNG, then close. Use an empty test data directory. The Blindly4 repository documents its permission-free and interactive integration suites.
 
 macOS-only tests remain in macOS/Linux CI. Symlink tests report a skip if Windows denies symlink creation; no system security settings are changed to run tests.
+
+### Window-title fix validation (2026-10-14)
+
+The Windows x64 package with the native-title fix compiled successfully. Its new
+self-test reads the actual Win32 caption without showing the window or starting
+the host. Execution of this rebuilt package remains unverified on the reporting
+laptop: Windows Application event 1026 reported that Application Control blocked
+`Sapiens4.dll` with error `0x800711C7` before startup. No security policy was changed.
+The new self-test and the native Sapiens-to-Chrome-to-Sapiens foreground sequence
+still need execution on a machine that permits the build.
+
+Before the title change, the UTF-8-fixed build passed 20 focused Python tests,
+18 desktop self-tests, and the live WebView2 smoke test (including native/group
+browser checks and 12 theme checks). These earlier results do not validate the
+new title test or establish reliable unattended foreground activation.
 
 ## Desktop access
 
