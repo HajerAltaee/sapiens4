@@ -55,3 +55,16 @@ macOS-only tests remain in macOS/Linux CI. Symlink tests report a skip if Window
 Blindly4 uses native Windows UI Automation and SendInput. Its command interface retains AX-style role names for compatibility. Desktop commands require an unlocked interactive session, exposed accessibility controls and matching privilege levels. Elevated apps and secure desktops are not supported. Draft guards fail closed when a control cannot expose its exact value. Serialize complete desktop workflows.
 
 Overrides: `SAPIENS_DATA_DIR`, `SAPIENS_BLINDLY_BINARY`, `SAPIENS_CODEX_BINARY`, `SAPIENS_CODEX_MODEL`, `SAPIENS_CODEX_REASONING_EFFORT`. The desktop uses a free loopback port and saves it in the data directory for the terminal client.
+
+The managed computer helper emits UTF-8 on stdout and stderr, including when
+started from a shell whose default Python pipe encoding is a legacy code page.
+Do not strip Unicode characters from application labels to work around encoding
+errors. `tests/test_computer_encoding.py` covers this boundary without desktop input.
+
+Windows can refuse a background process's foreground-activation request. This is
+different from a missing accessibility permission. For a user-requested web task,
+the supported `blindly open --url <task-url>` command can open the intended page;
+then freshly verify the application, URL and foreground PID before input. Opening
+a URL does not guarantee focus. If input is still blocked, stop and ask the user
+to bring the target forward and leave it active. Never disable the foreground or
+draft guards, and do not count a completed model reply as a completed UI task.
